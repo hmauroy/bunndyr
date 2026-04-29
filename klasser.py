@@ -34,33 +34,32 @@ class Simulering:
         forrige_tid = time.time()
         start_tid = time.time()
         isRunning = True
-        isSimulating = False
+        isSimulating = True
         fps = 10
         intervall = 1 / fps
         self.bunndyr.tegn()
         self.window.update()
         self.plankton.append(Plankton(self.canvas,self.bredde,self.høyde))
         while isRunning:
-            if time.time()-forrige_tid >= intervall:
-                forrige_tid = time.time()
-                # Sletter alt i canvas før vi gjør forflytninger etc.
-                self.canvas.delete("bunndyr")
-                # Flytter ting
+            while isSimulating:
+                if time.time()-forrige_tid >= intervall:
+                    forrige_tid = time.time()
+                    # Sletter alt i canvas før vi gjør forflytninger etc.
+                    self.canvas.delete("bunndyr")
+                    self.canvas.delete("plankton")
+                    # Flytter ting
+                    for p in self.plankton:
+                        p.flytt()
 
-                # Kollisjon
+                    # Kollisjon
 
-                # Tegner opp på nytt
-                self.bunndyr.tegn()
-                # Tegner alle plankton
-                for p in self.plankton:
-                    print(p.x,p.y)
-                    p.tegn()
-                
+                    # Tegner opp på nytt
+                    self.bunndyr.tegn()
+                    # Tegner alle plankton
+                    for p in self.plankton:
+                        p.tegn()
+                    
                 self.window.update()
-            """
-            self.bunndyr.tegn()
-            self.window.update()
-            """
 
         
         
@@ -94,6 +93,10 @@ class Plankton:
         self.x = vindubredde/2
         self.y = self.w/2
         self.giftig = choice([True,False])
+        self.dy = 10
+
+    def flytt(self):
+        self.y += self.dy
 
     def tegn(self):
         """Bør være arv her!"""
