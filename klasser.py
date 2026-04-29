@@ -35,7 +35,7 @@ class Simulering:
         start_tid = time.time()
         isRunning = True
         isSimulating = True
-        fps = 10
+        fps = 30
         intervall = 1 / fps
         self.bunndyr.tegn()
         self.window.update()
@@ -50,8 +50,17 @@ class Simulering:
                     # Flytter ting
                     for p in self.plankton:
                         p.flytt()
-
-                    # Kollisjon
+                        # Kollisjon
+                        if self.kollisjon(self.bunndyr,p):
+                            if p.giftig:
+                                self.bunndyr.w -= 10
+                            else:
+                                self.bunndyr.w += 10
+                            if self.bunndyr.w >= self.bredde or self.bunndyr.w <= p.w:
+                                isSimulating = False
+                            self.plankton.remove(p)
+                        
+                    
 
                     # Tegner opp på nytt
                     self.bunndyr.tegn()
@@ -61,7 +70,13 @@ class Simulering:
                     
                 self.window.update()
 
-        
+    def kollisjon(self,rect1,rect2):
+        return not (
+            rect1.x + rect1.w  <= rect2.x or   # rect1 is left of rect2
+            rect2.x + rect2.w  <= rect1.x or   # rect2 is left of rect1
+            rect1.y + rect1.h <= rect2.y or   # rect1 is above rect2
+            rect2.y + rect2.h <= rect1.y      # rect2 is above rect1
+        )
         
 
 class Bunndyr:
@@ -90,6 +105,7 @@ class Plankton:
     def __init__(self,canvas,vindubredde, vinduhøyde):
         self.canvas = canvas
         self.w = 20
+        self.h = self.w
         self.x = vindubredde/2
         self.y = self.w/2
         self.giftig = choice([True,False])
@@ -103,7 +119,7 @@ class Plankton:
         farge = "green"
         if self.giftig:
             farge = "red"
-        self.canvas.create_rectangle(self.x-self.w/2,self.y-self.w/2, self.x+self.w/2,self.y+self.w/2,outline="",fill=farge,tags="plankton")
+        self.canvas.create_rectangle(self.x-self.w/2,self.y-self.h/2, self.x+self.w/2,self.y+self.h/2,outline="",fill=farge,tags="plankton")
 
 
 def main():
