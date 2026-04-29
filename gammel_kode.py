@@ -2,7 +2,7 @@
 
 import tkinter as tk
 import time
-from random import choice, randrange, randint
+from random import choice
 
 class Simulering:
     """
@@ -18,7 +18,7 @@ class Simulering:
     5) Hva skjer ved kollisjon.
     6) Lage flere plankton
     """
-    def __init__(self, bredde, høyde, fps=30, plankton_bredde = 20):
+    def __init__(self, bredde, høyde):
         self.bredde = bredde
         self.høyde = høyde
         self.window = tk.Tk()
@@ -28,70 +28,37 @@ class Simulering:
         self.canvas.pack()
         self.bunndyr = Bunndyr(self.canvas,self.bredde,self.høyde)
         self.plankton = []
-        self.fps = fps
-        self.generasjons_tid = 2
-        self.plankton_bredde = plankton_bredde
         
-    def lag_plankton(self,w):
-        """Lager en tilfeldig posisjon for hvert plankton der det ikke overlapper med andre plankton."""
-        print(w,self.bredde)
-        x = randrange(w//2,self.bredde - w//2)  # Bruker heltallsdivisjon pga. randrange krever int for begge parametre.
-        y = randrange(-10*w,w//2)
-        plankton_1 = Plankton(x, y, w, self.canvas)
-        # Sjekker overlapp mot alle andre plankton med en låsende while loop. Lager nytt objekt hvis overlapp.
-        overlapp = True
-        while overlapp:
-            for p in self.plankton:
-                if self.kollisjon(p,plankton_1):
-                    # Lager nytt objekt og sjekker igjen for overlapp.
-                    plankton_1 = Plankton(x, y, w, self.canvas)
-            # Hvis for-loop ikke fant noen overlapp.
-            overlapp = False
-        self.plankton.append(plankton_1)
-
+    
     def loop(self):
         forrige_tid = time.time()
-        plankton_tid = time.time()
+        start_tid = time.time()
         isRunning = True
         isSimulating = True
-        fps = self.fps
+        fps = 30
         intervall = 1 / fps
         self.bunndyr.tegn()
         self.window.update()
-        # Lager n antall plankton fra starten
-        n = randint(5,15)
-        for i in range(n):
-            self.lag_plankton(self.plankton_bredde)
-        print(self.plankton)
+        self.plankton.append(Plankton(self.canvas,self.bredde,self.høyde))
         while isRunning:
             while isSimulating:
-                # For hvert 3. sekund lages det tre nye plankton
-                if time.time()-plankton_tid >= self.generasjons_tid:
-                    for i in range(3):
-                        self.lag_plankton(self.plankton_bredde)
-                        plankton_tid = time.time()
                 if time.time()-forrige_tid >= intervall:
                     forrige_tid = time.time()
                     # Sletter alt i canvas før vi gjør forflytninger etc.
                     self.canvas.delete("bunndyr")
                     self.canvas.delete("plankton")
-                    # Flytter en plankton av gangen.
+                    # Flytter ting
                     for p in self.plankton:
                         p.flytt()
-                        # Sjekker om plankton har kommet nedenfor vinduet.
-                        if p.y > self.høyde - 10:
-                            self.plankton.remove(p)
                         # Kollisjon
                         if self.kollisjon(self.bunndyr,p):
                             if p.giftig:
-                                self.bunndyr.w -= 50
+                                self.bunndyr.w -= 10
                             else:
-                                self.bunndyr.w += 50
+                                self.bunndyr.w += 10
                             if self.bunndyr.w >= self.bredde or self.bunndyr.w <= p.w:
                                 isSimulating = False
                             self.plankton.remove(p)
-                            self.bunndyr.tegn()
-                            
                         
                     
 
@@ -100,8 +67,8 @@ class Simulering:
                     # Tegner alle plankton
                     for p in self.plankton:
                         p.tegn()
+                    
                 self.window.update()
-            self.window.update()
 
     def kollisjon(self,rect1,rect2):
         return not (
@@ -133,19 +100,16 @@ class Plankton:
     attributt
     giftig = True -> Rød farge
     ikke giftig -> Grønn farge
-    posisjon dannes automatisk i forhold til vinduets størrelse.
-    Opprettes ovenfor vinduet.
     tegnemetode som sjekker giftig for riktig farge. canvas må ligge som parameter.
     """
-    def __init__(self,x, y, w, canvas):
+    def __init__(self,canvas,vindubredde, vinduhøyde):
         self.canvas = canvas
-        self.w = w
+        self.w = 20
         self.h = self.w
-        self.x = x
-        self.y = y
+        self.x = 200
+        self.y = self.w/2
         self.giftig = choice([True,False])
-        self.dy = randint(5,8)
-        self.dy = 5
+        self.dy = 10
 
     def flytt(self):
         self.y += self.dy
@@ -159,10 +123,8 @@ class Plankton:
 
 
 def main():
-    sim = Simulering(600,600,300)
+    sim = Simulering(600,600)
     sim.loop()
-    # Avslutter koden med destroy når bruker lukker vinduet.
-    sim.window.destroy()
 
 if __name__ == "__main__":
     main()
