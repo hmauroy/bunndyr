@@ -18,7 +18,7 @@ class Simulering:
     5) Hva skjer ved kollisjon.
     6) Lage flere plankton
     """
-    def __init__(self, bredde, høyde, fps=30, plankton_bredde = 20):
+    def __init__(self, bredde, høyde, fps=30, plankton_bredde=20,generasjons_tid=1):
         self.bredde = bredde
         self.høyde = høyde
         self.window = tk.Tk()
@@ -29,7 +29,7 @@ class Simulering:
         self.bunndyr = Bunndyr(self.canvas,self.bredde,self.høyde)
         self.plankton = []
         self.fps = fps
-        self.generasjons_tid = 2
+        self.generasjons_tid = generasjons_tid
         self.plankton_bredde = plankton_bredde
         
     def lag_plankton(self,w):
@@ -144,22 +144,24 @@ class Plankton:
         self.x = x
         self.y = y
         self.giftig = choice([True,False])
-        self.dy = randint(5,8)
-        self.dy = 5
+        self.dy = randint(5,10)
 
     def flytt(self):
         self.y += self.dy
 
     def tegn(self):
         """Bør være arv her!"""
-        farge = "green"
+        farge = "chartreuse"
+        label = "G"
         if self.giftig:
             farge = "red"
+            label = "R"
         self.canvas.create_rectangle(self.x-self.w/2,self.y-self.h/2, self.x+self.w/2,self.y+self.h/2,outline="",fill=farge,tags="plankton")
+        self.canvas.create_text(self.x,self.y,text=label,font=("Arial", 14), fill="black", tags="label_text")
 
 
 def main():
-    sim = Simulering(600,600,300)
+    sim = Simulering(600,600,30,20,1)
     sim.loop()
     # Avslutter koden med destroy når bruker lukker vinduet.
     sim.window.destroy()
